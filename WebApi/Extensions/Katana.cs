@@ -34,16 +34,16 @@
                 return app;
             }
 
-            public static IAppBuilder SetDataProtectionProvider(this IAppBuilder appBuilder, IApplicationBuilder app)
-            {
-                var provider = app.ApplicationServices.GetRequiredService<IDataProtectionProvider>();
-                appBuilder.Properties["security.DataProtectionProvider"] = new DataProtectionProviderDelegate(purposes =>
-                {
-                    var dataProtection = provider.CreateProtector(string.Join(",", purposes));
-                    return new DataProtectionTuple(dataProtection.Protect, dataProtection.Unprotect);
-                });
-                return appBuilder;
-            }
+            //public static IAppBuilder SetDataProtectionProvider(this IAppBuilder appBuilder, IApplicationBuilder app)
+            //{
+            //    var provider = app.ApplicationServices.GetRequiredService<IDataProtectionProvider>();
+            //    appBuilder.Properties["security.DataProtectionProvider"] = new DataProtectionProviderDelegate(purposes =>
+            //    {
+            //        var dataProtection = provider.CreateProtector(string.Join(",", purposes));
+            //        return new DataProtectionTuple(dataProtection.Protect, dataProtection.Unprotect);
+            //    });
+            //    return appBuilder;
+            //}
         }
     }
 }

@@ -47,12 +47,7 @@ namespace ng2SignalR.hub.Hubs
         {
             throw new System.Exception("Oops, an error occured");
         }
-
-        public List<string> SimulateSlowConnection(int waitTime)
-        {
-            Thread.Sleep(waitTime);
-            return GetNgBeSpeakers();
-        }
+             
 
         public override Task OnDisconnected(bool stopCalled)
         {
@@ -69,13 +64,32 @@ namespace ng2SignalR.hub.Hubs
         }
 
         private string GetAuthenticatedUser() {
-            var username = Context.QueryString["peer"];
-            if (string.IsNullOrWhiteSpace(username))
-                throw new System.Exception("Failed to authenticate user.");
-
+            var username = Context.QueryString["user"];
+           
             Trace.TraceInformation("GetAuthenticatedUser :" + username);
 
             return username;
+        }
+
+        public Task JoinRoom()
+        {
+            return Groups.Add(Context.ConnectionId, "Room");
+        }
+
+        public Task LeaveRoom()
+        {
+            return Groups.Remove(Context.ConnectionId, "Room");
+        }
+
+        public void ChatInRoom(ChatMessage message)
+        {
+            if (message.content == "") return; // HACK: echo-cancelation 
+            Clients.OthersInGroup("Room").OnRoomMessageSent(message);
+        }
+
+        public void KeyupInRoom(string status)
+        {
+            Clients.OthersInGroup("Room").OnRoomKeyupSent(status);
         }
     }
 

@@ -12,6 +12,10 @@ using Microsoft.AspNet.SignalR;
 using ng2SignalR.hub.Hubs;
 using Autofac;
 using Ng2Aa_demo.Extensions.Microsoft.AspNetCore.Builder;
+using ng2signalR.Hubs;
+using Microsoft.Owin.Security.DataProtection;
+using Ng2Aa_demo.Extensions;
+using Microsoft.Owin.Cors;
 
 namespace ng2SignalR.hub
 {
@@ -63,24 +67,47 @@ namespace ng2SignalR.hub
             app.UseAppBuilder(appBuilder =>
             {
                 appBuilder.UseCors(Microsoft.Owin.Cors.CorsOptions.AllowAll);
+                //appBuilder.SetDataProtectionProvider(new MachineKeyProtectionProvider());
             });
                        
+            
             GlobalHost.HubPipeline.AddModule(new LoggingPipelineModule());
 
             app.UseStaticFiles();
 
             app.UseAppBuilder(appBuilder =>
             {
+                appBuilder.SetDataProtectionProvider(new MachineKeyProtectionProvider());
+
+                appBuilder.Map("/signalr", map =>
+                {
+                    //map.UseCors(Microsoft.Owin.Cors.CorsOptions.AllowAll);
+                    var hubConfiguration = new HubConfiguration
+                    {
+                        // You can enable JSONP by uncommenting line below.
+                        // JSONP requests are insecure but some older browsers (and some
+                        // versions of IE) require JSONP to work cross domain
+                        // EnableJSONP = true
+                        EnableDetailedErrors = true
+                    };
+                    // Run the SignalR pipeline. We're not using MapSignalR
+                    // since this branch already runs under the "/signalr"
+                    // path.
+                    map.RunSignalR(hubConfiguration);
+                });
+
                 //create SignalR JavaScript Library  and expose it over signalr/hubs url
-                var hubConfiguration = new HubConfiguration();
-                hubConfiguration.EnableDetailedErrors = true;
-                appBuilder.MapSignalR(hubConfiguration);
+                //var hubConfiguration = new HubConfiguration();
+                //hubConfiguration.EnableDetailedErrors = true;
+                //appBuilder.MapSignalR(hubConfiguration);
+                
+                //KatanaIApplicationBuilderExtensions.SetDataProtectionProvider(appBuilder, app);
             });
+
+            
 
             app.UseMvc();
         }
-
-       
 
     }
 
